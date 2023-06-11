@@ -31,5 +31,8 @@ fn get_remote_contract(deps: Deps, chain_id: String) -> StdResult<String> {
 }
 
 fn is_already_mint(deps: Deps, owner: String) -> StdResult<bool> {
-    ALREADY_MINTED.load(deps.storage, owner)
+    match ALREADY_MINTED.load(deps.storage, owner) {
+        Ok(res) => Ok(res),
+        Err(_) => Ok(false)
+    }
 }

@@ -43,8 +43,6 @@ cw20 = { version = "0.13.4" }
 cw20-base = { version = "0.13.4", features = ["library"] }
 cw0 = { version = "0.10.3" }
 cw2 = { version = "0.13.2" }
-cosmwasm-crypto = "1.0.0"
-getrandom = { version = "0.2", features = ["js"] }
 hex = "0.4"
 arrayref = "0.3.6"
 codec = { package = "parity-scale-codec", version = "2.0.0", features = ["derive"] }

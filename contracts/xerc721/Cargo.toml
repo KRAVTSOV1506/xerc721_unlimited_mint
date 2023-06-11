@@ -54,13 +54,13 @@ serde = { version = "1.0.137", default-features = false, features = ["derive"] }
 thiserror = { version = "1.0.31" }
 cw0 = { version = "0.10.3" }
 cw2 = { version = "0.13.2" }
-cosmwasm-crypto = "1.0.0"
 getrandom = { version = "0.2", features = ["js"] }
 hex = "0.4"
 arrayref = "0.3.6"
 codec = { package = "parity-scale-codec", version = "2.0.0", features = ["derive"] }
 router-wasm-bindings = { version = "0.2.3", default-features = false, features = ["ethabi"] }
 new-crosstalk-sample = { package = "new-crosstalk-sample", path = "../../packages/new-crosstalk-sample"}
+ed25519-zebra = { version = "3.1.0" }
 
 [dev-dependencies]
 cosmwasm-schema = "1.0.0"

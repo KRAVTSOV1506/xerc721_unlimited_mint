@@ -3,7 +3,7 @@ use cosmwasm_std::{CustomMsg, StdResult};
 use router_wasm_bindings::{
     ethabi::{ethereum_types::U256, ParamType, Token},
     types::{ChainType, RequestMetaData},
-    utils::{convert_address_from_bytes_to_string, convert_address_from_string_to_bytes},
+    utils::convert_address_from_string_to_bytes,
     Bytes,
 };
 use schemars::JsonSchema;
@@ -12,7 +12,7 @@ use schemars::JsonSchema;
 pub struct InstantiateMsg {
     pub name: String,
     pub symbol: String,
-    pub minter: String, // fee payer will be contract itself
+    pub public_key: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -76,6 +76,7 @@ pub enum ExecuteMsg {
     },
     MintToken {
         token_uri: String,
+        signature: String,
         owner: String,
     },
 }

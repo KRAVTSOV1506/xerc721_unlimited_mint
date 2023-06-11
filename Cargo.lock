@@ -7,7 +7,6 @@ name = "XERC721"
 version = "0.1.0"
 dependencies = [
  "arrayref",
- "cosmwasm-crypto",
  "cosmwasm-schema 1.2.6",
  "cosmwasm-std",
  "cosmwasm-storage",
@@ -18,6 +17,7 @@ dependencies = [
  "cw2 0.13.4",
  "cw721 0.17.0",
  "cw721-base",
+ "ed25519-zebra",
  "getrandom",
  "hex",
  "new-crosstalk-sample",
@@ -819,7 +819,6 @@ name = "new-crosstalk-sample"
 version = "0.1.0"
 dependencies = [
  "arrayref",
- "cosmwasm-crypto",
  "cosmwasm-schema 0.16.7",
  "cosmwasm-std",
  "cw-storage-plus 0.13.4",
@@ -827,7 +826,6 @@ dependencies = [
  "cw2 0.13.4",
  "cw20",
  "cw20-base",
- "getrandom",
  "hex",
  "parity-scale-codec",
  "router-wasm-bindings",

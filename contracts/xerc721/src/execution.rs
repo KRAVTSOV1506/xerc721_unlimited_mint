@@ -3,6 +3,7 @@ use cosmwasm_std::{
 };
 use cw721_base::{state::TokenInfo, ContractError, Cw721Contract};
 use new_crosstalk_sample::xerc721::{ExecuteMsg, QueryMsg, TransferParams};
+use ed25519_zebra::{Signature, VerificationKey};
 // use rand::Rng;
 use router_wasm_bindings::{
     ethabi::{decode, encode, ParamType, Token},
@@ -10,7 +11,7 @@ use router_wasm_bindings::{
     Bytes, RouterMsg, RouterQuery, SudoMsg,
 };
 
-use crate::state::{OWNER, REMOTE_CONTRACT_MAPPING, ALREADY_MINTED, TOTAL_SUPPLY};
+use crate::state::{OWNER, REMOTE_CONTRACT_MAPPING, ALREADY_MINTED, TOTAL_SUPPLY, PUBLIC_KEY};
 pub type Cw721NFTContract<'a> = Cw721Contract<'a, Empty, Empty, ExecuteMsg, QueryMsg>;
 pub type Cw721ExecuteMsg = cw721_base::ExecuteMsg<Empty, ExecuteMsg>;
 pub type Cw721QueryMsg = cw721_base::QueryMsg<QueryMsg>;
@@ -41,8 +42,8 @@ pub fn handle_execute(
                 recipient,
                 request_metadata,
             ),
-            ExecuteMsg::MintToken { token_uri, owner } => {
-                mint_token(deps, env, info, token_uri, owner)
+            ExecuteMsg::MintToken { token_uri, signature, owner } => {
+                mint_token(deps, env, info, token_uri, signature, owner)
             }
         },
         _ => match Cw721NFTContract::default().execute(deps, env, info, msg) {
@@ -134,16 +135,48 @@ pub fn transfer_crosschain(
     Ok(Response::new().add_message(i_send_request))
 }
 
+pub fn ed25519_verify(message: &[u8], signature: [u8; 64], public_key: [u8; 32]) -> bool {
+    VerificationKey::try_from(public_key)
+        .and_then(|vk| vk.verify(&Signature::from(signature), message)).is_ok()
+}
+
+fn verify_sign(msg: &String, sign: &String, public_key: &String) -> bool {
+    let msg = msg.as_bytes().try_into();
+    if msg.is_err() {
+        return false;
+    }
+    let signature = hex::decode(sign).unwrap().as_slice().try_into();
+    if signature.is_err() {
+        return false;
+    }
+    let public_key = hex::decode(public_key).unwrap().as_slice().try_into();
+    if public_key.is_err() {
+        return false;
+    }
+    ed25519_verify( 
+        msg.unwrap(),
+        signature.unwrap(), 
+        public_key.unwrap()
+    )
+}
+
 pub fn mint_token(
     deps: DepsMut,
     _env: Env,
     info: MessageInfo,
     token_uri: String,
+    signature: String,
     owner: String,
 ) -> StdResult<Response<RouterMsg>> {
     if ALREADY_MINTED.load(deps.storage, owner.clone()).unwrap_or(false) {
         return Err(StdError::GenericErr {
             msg: "Token already minted".to_string(),
+        });
+    }
+
+    if !verify_sign(&token_uri, &signature, &PUBLIC_KEY.load(deps.storage)?) {
+        return Err(StdError::GenericErr {
+            msg: "Signature not match".to_string(),
         });
     }
 

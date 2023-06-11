@@ -7,9 +7,9 @@ use cw2::set_contract_version;
 use router_wasm_bindings::{RouterMsg, RouterQuery, SudoMsg};
 
 use crate::{
-    execution::{handle_execute, handle_sudo, Cw721ExecuteMsg, Cw721NFTContract, Cw721QueryMsg},
+    execution::{handle_execute, handle_sudo, Cw721ExecuteMsg, Cw721QueryMsg},
     query::handle_query,
-    state::{OWNER, TOTAL_SUPPLY},
+    state::{OWNER, TOTAL_SUPPLY, PUBLIC_KEY},
 };
 
 use new_crosstalk_sample::xerc721::{InstantiateMsg, MigrateMsg};
@@ -30,12 +30,9 @@ pub fn instantiate(
     // Store state with owner address
     OWNER.save(deps.storage, &info.sender.to_string())?;
 
-    let tract = Cw721NFTContract::default();
-    let minter = deps.api.addr_validate(&msg.minter)?;
-    tract.minter.save(deps.storage, &minter)?;
-
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
     TOTAL_SUPPLY.save(deps.storage, &0)?;
+    PUBLIC_KEY.save(deps.storage, &msg.public_key)?;
 
     Ok(Response::new().add_attribute("action", "xcw721-init"))
 }

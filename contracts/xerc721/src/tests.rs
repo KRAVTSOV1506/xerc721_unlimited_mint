@@ -1,7 +1,6 @@
 use crate::contract::{execute, instantiate, query};
 use crate::execution::{Cw721ExecuteMsg, Cw721QueryMsg};
 use cw721::{NftInfoResponse, OwnerOfResponse};
-use cw721_base::MintMsg;
 use new_crosstalk_sample::xerc721::{ExecuteMsg, InstantiateMsg, QueryMsg};
 use router_wasm_bindings::types::RequestMetaData;
 use router_wasm_bindings::RouterMsg;
@@ -16,7 +15,7 @@ use cosmwasm_std::DepsMut;
 use cosmwasm_std::OwnedDeps;
 use std::marker::PhantomData;
 
-const SENDER: &str = "router1apapk9zfz3rp4x87fsm6h0s3zd0wlmkz0fx8tx";
+const SENDER: &str = "router1sxc6t9uh9u8f252gl3yqetlt6qmp2syx3v0p3w";
 
 fn get_mock_dependencies() -> OwnedDeps<MockStorage, MockApi, MockQuerier> {
     OwnedDeps {
@@ -31,7 +30,7 @@ fn do_instantiate(mut deps: DepsMut) {
     let instantiate_msg = InstantiateMsg {
         name: "ERC721".into(),
         symbol: "ERC721".into(),
-        minter: SENDER.to_string(),
+        public_key: "6a99e543f5eb501d51995083161e3b75528d77d26d62d83cda5439b057653d78".into(),
     };
     let info = mock_info(SENDER, &[]);
     let env = mock_env();
@@ -121,15 +120,92 @@ fn test_mint_nft() {
 
     do_instantiate(deps.as_mut());
 
-    let mint_msg = MintMsg {
-        token_id: "2".into(),
-        token_uri: None,
-        owner: SENDER.into(),
-        extension: Empty {},
+    let mint_msg = ExecuteMsg::MintToken { 
+        token_uri: "https://ipfs.io/ipfs/Qma49KCamwSberpE8whTz3ESk81PoGtLsimmj3YhsWJKPX".to_string(), 
+        signature: "4676479df870e8fdb75b3b24fbe1ca7748bce5bfa9a6621087603d3ac97c1b5a00da3768adaefbf1ecd88d6ab576bb42c1c7325666349ecf7487385286757a09".to_string(), 
+        owner: SENDER.to_string(), 
     };
-    let mint_msg = Cw721ExecuteMsg::Mint(mint_msg);
+    let mint_msg = Cw721ExecuteMsg::Extension{ msg: mint_msg };
     let res = execute(deps.as_mut(), env.clone(), info.clone(), mint_msg.clone());
     assert!(res.is_ok());
+}
+
+#[test]
+fn test_can_not_mint_nft_with_wrong_sign() {
+    let mut deps = mock_dependencies();
+    let env = mock_env();
+    let info = mock_info(SENDER, &[]);
+
+    do_instantiate(deps.as_mut());
+
+    let mint_msg = ExecuteMsg::MintToken { 
+        token_uri: "https://ipfs.io/ipfs/Qma49KCamwSberpE8whTz3ESk81PoGtLsimmj3YhsWJKPX".to_string(), 
+        signature: "4676479df870e8fdb75b3b24fbe1ca7748bce5bfa9a6621087603d3ac97c1b5a00da3768adaefbf1ecd88d6ab576bb42c1c7325666349ecf7487385286757a01".to_string(), 
+        owner: SENDER.to_string(), 
+    };
+    let mint_msg = Cw721ExecuteMsg::Extension{ msg: mint_msg };
+    let res = execute(deps.as_mut(), env.clone(), info.clone(), mint_msg.clone());
+    assert!(res.is_err());
+}
+
+#[test]
+fn test_can_not_mint_nft_twice() {
+    let mut deps = mock_dependencies();
+    let env = mock_env();
+    let info = mock_info(SENDER, &[]);
+
+    do_instantiate(deps.as_mut());
+
+    let mint_msg = ExecuteMsg::MintToken { 
+        token_uri: "https://ipfs.io/ipfs/Qma49KCamwSberpE8whTz3ESk81PoGtLsimmj3YhsWJKPX".to_string(), 
+        signature: "4676479df870e8fdb75b3b24fbe1ca7748bce5bfa9a6621087603d3ac97c1b5a00da3768adaefbf1ecd88d6ab576bb42c1c7325666349ecf7487385286757a09".to_string(), 
+        owner: SENDER.to_string(), 
+    };
+    let mint_msg = Cw721ExecuteMsg::Extension{ msg: mint_msg };
+    let res = execute(deps.as_mut(), env.clone(), info.clone(), mint_msg.clone());
+    assert!(res.is_ok());
+
+    let mint_msg = ExecuteMsg::MintToken { 
+        token_uri: "https://ipfs.io/ipfs/QmakZtb3uKouz5QFGTaUvjN3akJDkAgGGSLh61aqEUnGt1".to_string(), 
+        signature: "c2623cdaf5e714b7f7e64ae0ebb49b5ddeb199215016395a75ac6a81985a1dc97d2fe6f79ca4e5f7305ce49d9ad8c11a4ce2db1d499fdcc2f841fae20bf4b90c".to_string(), 
+        owner: SENDER.to_string(), 
+    };
+    let mint_msg = Cw721ExecuteMsg::Extension{ msg: mint_msg };
+    let res = execute(deps.as_mut(), env.clone(), info.clone(), mint_msg.clone());
+    assert!(res.is_err());
+}
+
+#[test]
+fn test_two_mint_nft() {
+    let mut deps = mock_dependencies();
+    let env = mock_env();
+    let info = mock_info(SENDER, &[]);
+
+    do_instantiate(deps.as_mut());
+
+    let mint_msg = ExecuteMsg::MintToken { 
+        token_uri: "https://ipfs.io/ipfs/Qma49KCamwSberpE8whTz3ESk81PoGtLsimmj3YhsWJKPX".to_string(), 
+        signature: "4676479df870e8fdb75b3b24fbe1ca7748bce5bfa9a6621087603d3ac97c1b5a00da3768adaefbf1ecd88d6ab576bb42c1c7325666349ecf7487385286757a09".to_string(), 
+        owner: SENDER.to_string(), 
+    };
+    let mint_msg = Cw721ExecuteMsg::Extension{ msg: mint_msg };
+    let res = execute(deps.as_mut(), env.clone(), info.clone(), mint_msg.clone());
+    assert!(res.is_ok());
+
+    let response = get_nft_info(deps.as_ref(), env.clone(), "0".into());
+    assert!(response.is_ok());
+
+    let mint_msg = ExecuteMsg::MintToken { 
+        token_uri: "https://ipfs.io/ipfs/QmakZtb3uKouz5QFGTaUvjN3akJDkAgGGSLh61aqEUnGt1".to_string(), 
+        signature: "c2623cdaf5e714b7f7e64ae0ebb49b5ddeb199215016395a75ac6a81985a1dc97d2fe6f79ca4e5f7305ce49d9ad8c11a4ce2db1d499fdcc2f841fae20bf4b90c".to_string(), 
+        owner: "router1apapk9zfz3rp4x87fsm6h0s3zd0wlmkz0fx8tx".to_string(), 
+    };
+    let mint_msg = Cw721ExecuteMsg::Extension{ msg: mint_msg };
+    let res = execute(deps.as_mut(), env.clone(), info.clone(), mint_msg.clone());
+    assert!(res.is_ok());
+
+    let response = get_nft_info(deps.as_ref(), env.clone(),"1".into());
+    assert!(response.is_ok());
 }
 
 #[test]
@@ -148,13 +224,12 @@ fn test_transfer_crosschain() {
         remote_contract,
     );
 
-    let mint_msg = MintMsg {
-        token_id: "2".into(),
-        token_uri: None,
-        owner: SENDER.into(),
-        extension: Empty {},
+    let mint_msg = ExecuteMsg::MintToken { 
+        token_uri: "https://ipfs.io/ipfs/Qma49KCamwSberpE8whTz3ESk81PoGtLsimmj3YhsWJKPX".to_string(), 
+        signature: "4676479df870e8fdb75b3b24fbe1ca7748bce5bfa9a6621087603d3ac97c1b5a00da3768adaefbf1ecd88d6ab576bb42c1c7325666349ecf7487385286757a09".to_string(), 
+        owner: SENDER.to_string(), 
     };
-    let mint_msg = Cw721ExecuteMsg::Mint(mint_msg);
+    let mint_msg = Cw721ExecuteMsg::Extension{ msg: mint_msg };
     let res = execute(deps.as_mut(), env.clone(), info.clone(), mint_msg.clone());
     assert!(res.is_ok());
 
@@ -168,16 +243,16 @@ fn test_transfer_crosschain() {
         is_read_call: false,
         asm_address: "".into(),
     };
-    let response = get_nft_info(deps.as_ref(), env.clone(), "2".into());
+    let response = get_nft_info(deps.as_ref(), env.clone(), "0".into());
     assert!(response.is_ok());
 
-    let respone = get_nft_owner_of(deps.as_ref(), env.clone(), "2".into());
+    let respone = get_nft_owner_of(deps.as_ref(), env.clone(), "0".into());
     assert!(response.is_ok());
     assert_eq!(respone.unwrap().owner, SENDER);
 
     let ext_cc_msg = ExecuteMsg::TransferCrossChain {
         dst_chain_id: "1".into(),
-        token_id: 2,
+        token_id: 0,
         recipient: "0x1C609537a32630c054202e2B089B9Da268667C5D".to_string(),
         request_metadata,
     };
@@ -192,7 +267,7 @@ fn test_transfer_crosschain() {
                     version: _,
                     route_amount: _,
                     route_recipient: _,
-                    request_packet,
+                    request_packet: _,
                     request_metadata: _,
                     dest_chain_id: _,
                 } => {
