@@ -12,7 +12,7 @@ Initiate message:
 {
   "name": "NftName",
   "symbol": "Symbol",
-  "minter": "$owner_address"
+  "public_key": "6a99e543f5eb501d51995083161e3b75528d77d26d62d83cda5439b057653d78"
 }
 ```
 
