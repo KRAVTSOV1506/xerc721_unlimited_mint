@@ -283,7 +283,20 @@ fn test_transfer_crosschain() {
             }),
         };
     }
-    // nft should be burned with id 2
-    let response = get_nft_info(deps.as_ref(), env, "2".into());
+    // nft should be burned with id 0
+    let response = get_nft_info(deps.as_ref(), env.clone(), "0".into());
     assert!(response.is_err());
+
+    // try mint after cross chain transfer
+    let mint_msg = ExecuteMsg::MintToken { 
+        token_uri: "https://ipfs.io/ipfs/Qma49KCamwSberpE8whTz3ESk81PoGtLsimmj3YhsWJKPX".to_string(), 
+        signature: "4676479df870e8fdb75b3b24fbe1ca7748bce5bfa9a6621087603d3ac97c1b5a00da3768adaefbf1ecd88d6ab576bb42c1c7325666349ecf7487385286757a09".to_string(), 
+        owner: "router1apapk9zfz3rp4x87fsm6h0s3zd0wlmkz0fx8tx".to_string(), 
+    };
+    let mint_msg = Cw721ExecuteMsg::Extension{ msg: mint_msg };
+    let res = execute(deps.as_mut(), env.clone(), info.clone(), mint_msg.clone());
+    assert!(res.is_ok());
+
+    let response = get_nft_info(deps.as_ref(), env.clone(), "1".into());
+    assert!(response.is_ok());
 }
