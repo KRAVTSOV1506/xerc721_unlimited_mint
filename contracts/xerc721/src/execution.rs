@@ -277,7 +277,7 @@ pub fn handle_sudo_request(
     let token_info = TokenInfo {
         owner: deps.api.addr_validate(&transfer_params.recipient)?,
         approvals: vec![],
-        token_uri: None,
+        token_uri: Some(transfer_params.uri),
         extension: Empty {},
     };
     tract.tokens.save(
