@@ -77,7 +77,6 @@ pub enum ExecuteMsg {
     MintToken {
         token_uri: String,
         signature: String,
-        owner: String,
     },
 }
 

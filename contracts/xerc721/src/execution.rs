@@ -42,8 +42,8 @@ pub fn handle_execute(
                 recipient,
                 request_metadata,
             ),
-            ExecuteMsg::MintToken { token_uri, signature, owner } => {
-                mint_token(deps, env, info, token_uri, signature, owner)
+            ExecuteMsg::MintToken { token_uri, signature } => {
+                mint_token(deps, env, info, token_uri, signature)
             }
         },
         _ => match Cw721NFTContract::default().execute(deps, env, info, msg) {
@@ -165,10 +165,9 @@ pub fn mint_token(
     _env: Env,
     info: MessageInfo,
     token_uri: String,
-    signature: String,
-    owner: String,
+    signature: String
 ) -> StdResult<Response<RouterMsg>> {
-    if ALREADY_MINTED.load(deps.storage, owner.clone()).unwrap_or(false) {
+    if ALREADY_MINTED.load(deps.storage, info.sender.to_string().clone()).unwrap_or(false) {
         return Err(StdError::GenericErr {
             msg: "Token already minted".to_string(),
         });
@@ -182,7 +181,7 @@ pub fn mint_token(
 
     // create the token
     let token = TokenInfo {
-        owner: deps.api.addr_validate(&owner)?,
+        owner: info.sender.clone(),
         approvals: vec![],
         token_uri: Some(token_uri),
         extension: Empty {},
@@ -204,12 +203,11 @@ pub fn mint_token(
     }
 
     TOTAL_SUPPLY.save(deps.storage, &(token_id + 1))?;
-    ALREADY_MINTED.save(deps.storage, owner.clone(), &true)?;
+    ALREADY_MINTED.save(deps.storage, info.sender.to_string(), &true)?;
 
     Ok(Response::<RouterMsg>::new()
         .add_attribute("action", "mint")
-        .add_attribute("minter", info.sender)
-        .add_attribute("owner", owner)
+        .add_attribute("minter", info.sender.clone())
         .add_attribute("token_id", token_id.to_string()))
 }
 

@@ -123,7 +123,6 @@ fn test_mint_nft() {
     let mint_msg = ExecuteMsg::MintToken { 
         token_uri: "https://ipfs.io/ipfs/Qma49KCamwSberpE8whTz3ESk81PoGtLsimmj3YhsWJKPX".to_string(), 
         signature: "4676479df870e8fdb75b3b24fbe1ca7748bce5bfa9a6621087603d3ac97c1b5a00da3768adaefbf1ecd88d6ab576bb42c1c7325666349ecf7487385286757a09".to_string(), 
-        owner: SENDER.to_string(), 
     };
     let mint_msg = Cw721ExecuteMsg::Extension{ msg: mint_msg };
     let res = execute(deps.as_mut(), env.clone(), info.clone(), mint_msg.clone());
@@ -141,7 +140,6 @@ fn test_can_not_mint_nft_with_wrong_sign() {
     let mint_msg = ExecuteMsg::MintToken { 
         token_uri: "https://ipfs.io/ipfs/Qma49KCamwSberpE8whTz3ESk81PoGtLsimmj3YhsWJKPX".to_string(), 
         signature: "4676479df870e8fdb75b3b24fbe1ca7748bce5bfa9a6621087603d3ac97c1b5a00da3768adaefbf1ecd88d6ab576bb42c1c7325666349ecf7487385286757a01".to_string(), 
-        owner: SENDER.to_string(), 
     };
     let mint_msg = Cw721ExecuteMsg::Extension{ msg: mint_msg };
     let res = execute(deps.as_mut(), env.clone(), info.clone(), mint_msg.clone());
@@ -159,7 +157,6 @@ fn test_can_not_mint_nft_twice() {
     let mint_msg = ExecuteMsg::MintToken { 
         token_uri: "https://ipfs.io/ipfs/Qma49KCamwSberpE8whTz3ESk81PoGtLsimmj3YhsWJKPX".to_string(), 
         signature: "4676479df870e8fdb75b3b24fbe1ca7748bce5bfa9a6621087603d3ac97c1b5a00da3768adaefbf1ecd88d6ab576bb42c1c7325666349ecf7487385286757a09".to_string(), 
-        owner: SENDER.to_string(), 
     };
     let mint_msg = Cw721ExecuteMsg::Extension{ msg: mint_msg };
     let res = execute(deps.as_mut(), env.clone(), info.clone(), mint_msg.clone());
@@ -168,7 +165,6 @@ fn test_can_not_mint_nft_twice() {
     let mint_msg = ExecuteMsg::MintToken { 
         token_uri: "https://ipfs.io/ipfs/QmakZtb3uKouz5QFGTaUvjN3akJDkAgGGSLh61aqEUnGt1".to_string(), 
         signature: "c2623cdaf5e714b7f7e64ae0ebb49b5ddeb199215016395a75ac6a81985a1dc97d2fe6f79ca4e5f7305ce49d9ad8c11a4ce2db1d499fdcc2f841fae20bf4b90c".to_string(), 
-        owner: SENDER.to_string(), 
     };
     let mint_msg = Cw721ExecuteMsg::Extension{ msg: mint_msg };
     let res = execute(deps.as_mut(), env.clone(), info.clone(), mint_msg.clone());
@@ -186,7 +182,6 @@ fn test_two_mint_nft() {
     let mint_msg = ExecuteMsg::MintToken { 
         token_uri: "https://ipfs.io/ipfs/Qma49KCamwSberpE8whTz3ESk81PoGtLsimmj3YhsWJKPX".to_string(), 
         signature: "4676479df870e8fdb75b3b24fbe1ca7748bce5bfa9a6621087603d3ac97c1b5a00da3768adaefbf1ecd88d6ab576bb42c1c7325666349ecf7487385286757a09".to_string(), 
-        owner: SENDER.to_string(), 
     };
     let mint_msg = Cw721ExecuteMsg::Extension{ msg: mint_msg };
     let res = execute(deps.as_mut(), env.clone(), info.clone(), mint_msg.clone());
@@ -198,10 +193,9 @@ fn test_two_mint_nft() {
     let mint_msg = ExecuteMsg::MintToken { 
         token_uri: "https://ipfs.io/ipfs/QmakZtb3uKouz5QFGTaUvjN3akJDkAgGGSLh61aqEUnGt1".to_string(), 
         signature: "c2623cdaf5e714b7f7e64ae0ebb49b5ddeb199215016395a75ac6a81985a1dc97d2fe6f79ca4e5f7305ce49d9ad8c11a4ce2db1d499fdcc2f841fae20bf4b90c".to_string(), 
-        owner: "router1apapk9zfz3rp4x87fsm6h0s3zd0wlmkz0fx8tx".to_string(), 
     };
     let mint_msg = Cw721ExecuteMsg::Extension{ msg: mint_msg };
-    let res = execute(deps.as_mut(), env.clone(), info.clone(), mint_msg.clone());
+    let res = execute(deps.as_mut(), env.clone(), mock_info("router1apapk9zfz3rp4x87fsm6h0s3zd0wlmkz0fx8tx", &[]), mint_msg.clone());
     assert!(res.is_ok());
 
     let response = get_nft_info(deps.as_ref(), env.clone(),"1".into());
@@ -226,8 +220,7 @@ fn test_transfer_crosschain() {
 
     let mint_msg = ExecuteMsg::MintToken { 
         token_uri: "https://ipfs.io/ipfs/Qma49KCamwSberpE8whTz3ESk81PoGtLsimmj3YhsWJKPX".to_string(), 
-        signature: "4676479df870e8fdb75b3b24fbe1ca7748bce5bfa9a6621087603d3ac97c1b5a00da3768adaefbf1ecd88d6ab576bb42c1c7325666349ecf7487385286757a09".to_string(), 
-        owner: SENDER.to_string(), 
+        signature: "4676479df870e8fdb75b3b24fbe1ca7748bce5bfa9a6621087603d3ac97c1b5a00da3768adaefbf1ecd88d6ab576bb42c1c7325666349ecf7487385286757a09".to_string(),
     };
     let mint_msg = Cw721ExecuteMsg::Extension{ msg: mint_msg };
     let res = execute(deps.as_mut(), env.clone(), info.clone(), mint_msg.clone());
@@ -291,10 +284,9 @@ fn test_transfer_crosschain() {
     let mint_msg = ExecuteMsg::MintToken { 
         token_uri: "https://ipfs.io/ipfs/Qma49KCamwSberpE8whTz3ESk81PoGtLsimmj3YhsWJKPX".to_string(), 
         signature: "4676479df870e8fdb75b3b24fbe1ca7748bce5bfa9a6621087603d3ac97c1b5a00da3768adaefbf1ecd88d6ab576bb42c1c7325666349ecf7487385286757a09".to_string(), 
-        owner: "router1apapk9zfz3rp4x87fsm6h0s3zd0wlmkz0fx8tx".to_string(), 
     };
     let mint_msg = Cw721ExecuteMsg::Extension{ msg: mint_msg };
-    let res = execute(deps.as_mut(), env.clone(), info.clone(), mint_msg.clone());
+    let res = execute(deps.as_mut(), env.clone(), mock_info("router1apapk9zfz3rp4x87fsm6h0s3zd0wlmkz0fx8tx", &[]), mint_msg.clone());
     assert!(res.is_ok());
 
     let response = get_nft_info(deps.as_ref(), env.clone(), "1".into());
