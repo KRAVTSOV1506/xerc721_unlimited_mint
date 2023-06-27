@@ -7,6 +7,7 @@ use router_wasm_bindings::{
     Bytes,
 };
 use schemars::JsonSchema;
+use std::str;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct InstantiateMsg {
@@ -39,20 +40,9 @@ impl TransferParams {
     pub fn from_token_tuple(tuple: Vec<Token>) -> StdResult<Self> {
         let nft_id = tuple[0].clone().into_uint().unwrap().as_u64();
 
-        let has_prefix = true;
-        let prefix = if has_prefix { "0x" } else { "" };
-        let recipient = format!(
-            "{}{}",
-            prefix,
-            tuple[1]
-                .clone()
-                .into_bytes()
-                .unwrap()
-                .iter()
-                .map(|b| format!("{:02x}", b))
-                .collect::<String>()
-        );
-        let uri = tuple[2].clone().into_string().unwrap().to_ascii_lowercase();
+        let recipient = str::from_utf8(&tuple[1].clone().into_bytes().unwrap()).unwrap().to_string();
+
+        let uri = tuple[2].clone().into_string().unwrap();
         Ok(Self {
             nft_id,
             recipient,
