@@ -34,7 +34,7 @@ impl TransferParams {
         Ok(Token::Tuple(vec![token_id, Token::Bytes(recipient), uri]))
     }
     pub fn get_params_types() -> ParamType {
-        return ParamType::Tuple(vec![ParamType::Uint(256), ParamType::Bytes]);
+        return ParamType::Tuple(vec![ParamType::Uint(256), ParamType::Bytes, ParamType::String]);
     }
     pub fn from_token_tuple(tuple: Vec<Token>) -> StdResult<Self> {
         let nft_id = tuple[0].clone().into_uint().unwrap().as_u64();
