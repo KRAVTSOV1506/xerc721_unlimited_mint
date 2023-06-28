@@ -270,6 +270,8 @@ pub fn handle_sudo_request(
     let transfer_params_tokens: Vec<Token> = token_vec[0].clone().into_tuple().unwrap();
     let transfer_params: TransferParams = TransferParams::from_token_tuple(transfer_params_tokens)?;
 
+    println!("{:?}", deps.api.addr_validate(&transfer_params.recipient));
+
     // mint nft
     let tract = Cw721NFTContract::default();
     let token_info = TokenInfo {

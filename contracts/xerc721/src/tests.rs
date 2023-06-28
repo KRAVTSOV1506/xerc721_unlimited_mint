@@ -1,14 +1,16 @@
 use crate::contract::{execute, instantiate, query};
-use crate::execution::{Cw721ExecuteMsg, Cw721QueryMsg};
+use crate::execution::{handle_sudo_request, Cw721ExecuteMsg, Cw721QueryMsg};
 use cw721::{NftInfoResponse, OwnerOfResponse};
 use new_crosstalk_sample::xerc721::{ExecuteMsg, InstantiateMsg, QueryMsg};
 use router_wasm_bindings::types::RequestMetaData;
-use router_wasm_bindings::RouterMsg;
+use router_wasm_bindings::{RouterMsg, RouterQuery};
 
 use cosmwasm_std::testing::{
     mock_dependencies, mock_env, mock_info, MockApi, MockQuerier, MockStorage,
 };
-use cosmwasm_std::{CosmosMsg, Deps, Empty, Env, MessageInfo, Response, StdError, Uint128};
+use cosmwasm_std::{
+    Binary, CosmosMsg, Deps, Empty, Env, MessageInfo, Response, StdError, Uint128,
+};
 
 use cosmwasm_std::from_binary;
 use cosmwasm_std::DepsMut;
@@ -291,4 +293,43 @@ fn test_transfer_crosschain() {
 
     let response = get_nft_info(deps.as_ref(), env.clone(), "1".into());
     assert!(response.is_ok());
+}
+
+#[test]
+fn recieve_crosschain_transfer() {
+    let mut deps: OwnedDeps<cosmwasm_std::MemoryStorage, MockApi, MockQuerier> = mock_dependencies();
+
+    let env = mock_env();
+    let info = mock_info(SENDER, &[]);
+    let remote_contract = "0x15494E722DF0b5754e0C10DA05c7698a3CfcA639".to_string();
+
+    do_instantiate(deps.as_mut());
+    set_remote_contract(
+        deps.as_mut(),
+        env.clone(),
+        info.clone(),
+        "80001".into(),
+        remote_contract.clone(),
+    );
+
+    let mut deps: OwnedDeps<_, _, _, RouterQuery> = OwnedDeps {
+        storage: deps.storage,
+        api: MockApi::default(),
+        querier: MockQuerier::<RouterQuery>::new(&[]),
+        custom_query_type: PhantomData,
+    };
+    
+    let payload_str = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALXJvdXRlcjFmZTkyeGZ3Zm5mZDdwZ3JlbHptZDdnOWsyaGQwOW13anU0bm56egAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ2h0dHBzOi8vaXBmcy5pby9pcGZzL1FtTmVRUWF4cUhlVHQyTDIyMUVNczdzYTExZXpaWEZQdGZSZHBzeFhaU3FvTUgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    let payload = Binary::from_base64(payload_str).unwrap();
+
+    let result = handle_sudo_request(
+        deps.as_mut(),
+        env.clone(),
+        remote_contract,
+        "80001".into(),
+        0,
+        payload,
+    );
+    println!("{:?}", &result);
+    assert!(result.is_ok());
 }
