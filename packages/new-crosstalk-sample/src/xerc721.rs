@@ -3,7 +3,7 @@ use cosmwasm_std::{CustomMsg, StdResult};
 use router_wasm_bindings::{
     ethabi::{ethereum_types::U256, ParamType, Token},
     types::{ChainType, RequestMetaData},
-    utils::convert_address_from_string_to_bytes,
+    utils::{convert_address_from_string_to_bytes, convert_address_from_bytes_to_string},
     Bytes,
 };
 use schemars::JsonSchema;
@@ -40,7 +40,11 @@ impl TransferParams {
     pub fn from_token_tuple(tuple: Vec<Token>) -> StdResult<Self> {
         let nft_id = tuple[0].clone().into_uint().unwrap().as_u64();
 
-        let recipient = str::from_utf8(&tuple[1].clone().into_bytes().unwrap()).unwrap().to_string();
+        let recipient = convert_address_from_bytes_to_string(
+            &tuple[1].clone().into_bytes().unwrap(),
+            ChainType::ChainTypeCosmos.get_chain_code(),
+        )
+        .unwrap();
 
         let uri = tuple[2].clone().into_string().unwrap();
         Ok(Self {
